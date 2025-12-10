@@ -7,7 +7,7 @@ interface NeighborhoodStat {
   name: string;
   coords: LatLngExpression;
   avgPriceUsdM2: number; // precio promedio por m²
-  avgRentUsd: number;    // alquiler promedio 2 amb, por ejemplo
+  avgRentUsd: number; // alquiler promedio 2 amb, por ejemplo
 }
 
 const cabaCenter: LatLngExpression = [-34.6037, -58.3816]; // Obelisco aprox
@@ -28,7 +28,7 @@ const neighborhoods: NeighborhoodStat[] = [
   },
   {
     name: "Caballito",
-    coords: [-34.6186, -58.4420],
+    coords: [-34.6186, -58.442],
     avgPriceUsdM2: 2200,
     avgRentUsd: 550,
   },
@@ -44,12 +44,12 @@ const ArgentinaMap: FC = () => {
   return (
     <MapContainer
       center={cabaCenter}
-      zoom={12}              // 👈 Zoom más cerca de la ciudad
+      zoom={12} // 👈 Zoom más cerca de la ciudad
       scrollWheelZoom
       className="w-full h-full rounded-2xl"
     >
       <TileLayer
-        attribution='&copy; OpenStreetMap contributors'
+        attribution="&copy; OpenStreetMap contributors"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
@@ -59,9 +59,11 @@ const ArgentinaMap: FC = () => {
             <div style={{ fontSize: "0.85rem" }}>
               <strong>{n.name}</strong>
               <br />
-              Precio prom. venta: <strong>US$ {n.avgPriceUsdM2.toLocaleString()} / m²</strong>
+              Precio prom. venta:{" "}
+              <strong>US$ {n.avgPriceUsdM2.toLocaleString()} / m²</strong>
               <br />
-              Alquiler prom. 2 amb.: <strong>US$ {n.avgRentUsd.toLocaleString()}</strong>
+              Alquiler prom. 2 amb.:{" "}
+              <strong>US$ {n.avgRentUsd.toLocaleString()}</strong>
             </div>
           </Popup>
         </Marker>

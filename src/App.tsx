@@ -10,7 +10,8 @@ const App: FC = () => {
     <MainLayout>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<Dashboard />} /> {/* 👈 usa routes/Dashboard */}
+        <Route path="/dashboard" element={<Dashboard />} />{" "}
+        {/* 👈 usa routes/Dashboard */}
       </Routes>
     </MainLayout>
   );

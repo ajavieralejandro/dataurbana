@@ -24,10 +24,15 @@ const StatsStrip: FC = () => {
         <motion.div
           key={item.label}
           whileHover={{ scale: 1.03 }}
-          className="bg-slate-900/80 border border-slate-800 rounded-2xl px-4 py-3 shadow-xl"
+          className="relative bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3 shadow-xl text-center transition-shadow duration-300"
+          whileHover={{
+            boxShadow: "0 0 20px 8px rgba(56, 189, 248, 0.5)", // destello celeste
+          }}
         >
           <div className="text-xs text-slate-400">{item.label}</div>
-          <div className="text-xl font-semibold mt-1">{item.value}</div>
+          <div className="text-xl font-semibold mt-1 text-slate-50">
+            {item.value}
+          </div>
         </motion.div>
       ))}
     </motion.div>

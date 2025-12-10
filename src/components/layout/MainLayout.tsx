@@ -8,7 +8,7 @@ interface MainLayoutProps {
 
 const MainLayout: FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50">
+    <div className="min-h-screen flex flex-col bg-slate-900 text-slate-50">
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />

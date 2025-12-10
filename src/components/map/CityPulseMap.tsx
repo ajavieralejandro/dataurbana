@@ -1,11 +1,6 @@
 import type { FC } from "react";
 import { useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  CircleMarker,
-  Popup,
-} from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { motion, AnimatePresence } from "framer-motion";
@@ -72,9 +67,12 @@ const CityPulseMap: FC = () => {
         zoom={12}
         scrollWheelZoom
         className="w-full h-full"
+        whenCreated={(map) => {
+          map.on("click", () => setActive(null)); // cierra tarjeta al click en cualquier parte del mapa
+        }}
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
@@ -84,12 +82,15 @@ const CityPulseMap: FC = () => {
             center={n.coords}
             radius={getRadius(n.avgPriceUsdM2)}
             pathOptions={{
-              color: "#38bdf8", // sky-400
+              color: "#38bdf8",
               fillColor: "#38bdf8",
               fillOpacity: 0.35,
             }}
             eventHandlers={{
-              click: () => setActive(n),
+              click: (e) => {
+                e.originalEvent.stopPropagation(); // evita que el click en el marcador cierre la tarjeta
+                setActive((prev) => (prev?.name === n.name ? null : n));
+              },
               mouseover: () => setActive(n),
             }}
           >
@@ -97,10 +98,15 @@ const CityPulseMap: FC = () => {
               <div style={{ fontSize: "0.85rem" }}>
                 <strong>{n.name}</strong>
                 <br />
-                Prom. venta: <strong>US$ {n.avgPriceUsdM2.toLocaleString()} / m²</strong>
+                Prom. venta:{" "}
+                <span className="text-sky-700 font-bold">
+                  US$ {n.avgPriceUsdM2.toLocaleString()} / m²
+                </span>
                 <br />
                 Prom. alquiler 2 amb.:{" "}
-                <strong>US$ {n.avgRentUsd.toLocaleString()}</strong>
+                <span className="text-sky-700 font-bold">
+                  US$ {n.avgRentUsd.toLocaleString()}
+                </span>
               </div>
             </Popup>
           </CircleMarker>
@@ -133,15 +139,20 @@ const CityPulseMap: FC = () => {
               </span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-slate-300">
+              <span>
                 Venta prom.:{" "}
-                <strong>US$ {active.avgPriceUsdM2.toLocaleString()} / m²</strong>
+                <span className="text-sky-700 font-bold">
+                  US$ {active.avgPriceUsdM2.toLocaleString()} / m²
+                </span>
               </span>
-              <span className="text-slate-300">
+              <span>
                 Alquiler 2 amb.:{" "}
-                <strong>US$ {active.avgRentUsd.toLocaleString()}</strong>
+                <span className="text-sky-700 font-bold">
+                  US$ {active.avgRentUsd.toLocaleString()}
+                </span>
               </span>
             </div>
+
             <div className="mt-2 text-[0.7rem] text-slate-400">
               Datos demo hardcodeados. Después los conectamos al motor real de
               mercado.
