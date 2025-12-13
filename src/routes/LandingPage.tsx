@@ -25,50 +25,87 @@ const categorias = [
   { name: "Vehículos", icon: Car },
 ];
 
+const hero = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const mapBlock = {
+  hidden: { opacity: 0, scale: 0.96 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+      staggerChildren: 0.12,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const mapChild = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const section = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const gridStagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07 } },
+};
+
+const itemFade = {
+  hidden: { opacity: 0, y: 14, scale: 0.99 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35 } },
+};
+
 const LandingPage: FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
       {/* HERO PRINCIPAL */}
       <div className="grid md:grid-cols-[1.1fr,1fr] gap-10 items-center">
         {/* Columna izquierda */}
-        <div className="space-y-7 -mt-6">
-          {" "}
-          {/* 👈 SUBE SOLO ESTE BLOQUE */}
-          {/* Badge arriba */}
+        <motion.div variants={hero} initial="hidden" animate="show" className="space-y-7 -mt-6">
+          {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+            variants={fadeUp}
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700 text-sm text-slate-300"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span>Versión demo · Datos inmobiliarios CABA / AMBA</span>
           </motion.div>
+
           {/* Título */}
           <motion.h1
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            variants={fadeUp}
             className="text-3xl md:text-5xl font-bold tracking-tight"
           >
             Analítica inmobiliaria para el{" "}
             <span className="text-sky-400">mercado argentino</span>.
           </motion.h1>
+
           {/* Subtítulo */}
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
+            variants={fadeUp}
             className="text-sm md:text-base text-slate-300 leading-relaxed mt-5"
           >
             Visualizá precios por m², detectá oportunidades por barrio y seguí
             la evolución del mercado sobre un mapa interactivo de Argentina.
           </motion.p>
+
           {/* CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
+            variants={fadeUp}
             className="flex flex-wrap items-center gap-4 mt-6"
           >
             <Link
@@ -82,16 +119,16 @@ const LandingPage: FC = () => {
               Sin registro · Datos demo.
             </span>
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* Mapa animado */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <IntroAnimacionMapa />
-          <StatsStrip />
+        {/* Mapa + Stats (stagger) */}
+        <motion.div variants={mapBlock} initial="hidden" animate="show">
+          <motion.div variants={mapChild}>
+            <IntroAnimacionMapa />
+          </motion.div>
+          <motion.div variants={mapChild}>
+            <StatsStrip />
+          </motion.div>
         </motion.div>
       </div>
 
@@ -99,10 +136,10 @@ const LandingPage: FC = () => {
       <div className="mt-12 space-y-12">
         {/* BUSCADOR */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
+          variants={section}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.35 }}
           className="bg-slate-950/80 border border-slate-800 rounded-2xl px-6 py-6 shadow-xl"
         >
           <h2 className="text-sm md:text-base font-semibold text-slate-100 mb-2">
@@ -131,39 +168,64 @@ const LandingPage: FC = () => {
             </button>
           </form>
         </motion.div>
-        {/* 📌 SECCIÓN DE CATEGORÍAS */}
+
+        {/* CATEGORÍAS */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
+          variants={section}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.35 }}
           className="mt-6"
         >
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <motion.div
+            variants={gridStagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.35 }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          >
             {categorias.map(({ name, icon: Icon }) => (
               <motion.div
                 key={name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{
-                  scale: 1.03,
-                  boxShadow: "0 0 20px 8px rgba(56, 189, 248, 0.45)",
-                }}
-                className="relative bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-6 text-center shadow-xl text-slate-50 font-medium transition duration-300 cursor-pointer flex flex-col items-center gap-3"
+                variants={itemFade}
+                whileHover={{ y: -2, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                className="relative overflow-hidden bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-6 text-center shadow-xl text-slate-50 font-medium cursor-pointer flex flex-col items-center gap-3"
               >
-                <Icon className="w-7 h-7 text-sky-400" />
-                {name}
+                {/* glow */}
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 opacity-0"
+                  whileHover={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    background:
+                      "radial-gradient(600px circle at 50% 0%, rgba(56,189,248,0.22), transparent 45%)",
+                  }}
+                />
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-2xl"
+                  whileHover={{
+                    boxShadow: "inset 0 0 0 1px rgba(56,189,248,0.35)",
+                  }}
+                  transition={{ duration: 0.2 }}
+                />
+                <div className="relative flex flex-col items-center gap-3">
+                  <Icon className="w-7 h-7 text-sky-400" />
+                  {name}
+                </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
 
-        {/* 📌 SECCIÓN COTIZACIÓN */}
+        {/* COTIZACIÓN (tu bloque tal cual, solo entra con whileInView) */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
+          variants={section}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.35 }}
           className="bg-slate-950/80 border border-slate-800 rounded-2xl px-6 py-5 shadow-xl"
         >
           <h2 className="text-sm md:text-base font-semibold text-slate-100 mb-3">
@@ -171,7 +233,6 @@ const LandingPage: FC = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Dólar Oficial — VERDE */}
             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 shadow-md">
               <span className="text-sm font-semibold text-slate-100">
                 Dólar Oficial
@@ -186,7 +247,6 @@ const LandingPage: FC = () => {
               </div>
             </div>
 
-            {/* Dólar Blue — CELESTE */}
             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 shadow-md">
               <span className="text-sm font-semibold text-slate-100">
                 Dólar Blue
@@ -201,7 +261,6 @@ const LandingPage: FC = () => {
               </div>
             </div>
 
-            {/* Dólar MEP — AMARILLO */}
             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 shadow-md">
               <span className="text-sm font-semibold text-slate-100">
                 Dólar MEP
@@ -216,7 +275,6 @@ const LandingPage: FC = () => {
               </div>
             </div>
 
-            {/* Dólar CCL — ROJO */}
             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 shadow-md">
               <span className="text-sm font-semibold text-slate-100">
                 Dólar CCL
@@ -231,7 +289,6 @@ const LandingPage: FC = () => {
               </div>
             </div>
 
-            {/* USDT (Cripto) — FUXIA */}
             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 shadow-md">
               <span className="text-sm font-semibold text-slate-100">
                 USDT (Cripto)
@@ -246,7 +303,6 @@ const LandingPage: FC = () => {
               </div>
             </div>
 
-            {/* Bitcoin — NARANJA */}
             <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 shadow-md">
               <span className="text-sm font-semibold text-slate-100">
                 Bitcoin (USD)
@@ -265,65 +321,78 @@ const LandingPage: FC = () => {
           </p>
         </motion.div>
 
-        {/* 📌 SECCIÓN DE FEATURES */}
+        {/* FEATURES */}
         <div className="mb-6">
           <h2 className="text-lg md:text-xl font-semibold text-slate-100 mb-4">
             Qué podés hacer
           </h2>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
+            variants={gridStagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.35 }}
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
             {[
               {
                 title: "Mapa por barrios",
                 desc: "Explorá zonas de CABA para ver precios, tendencias y oportunidades.",
-                color: "text-sky-400",
               },
               {
                 title: "Venta / alquiler / inversión",
                 desc: "Cambiá entre los tres modos y descubrí insights específicos.",
-                color: "text-sky-400",
               },
               {
                 title: "Variaciones y sesiones",
                 desc: "Compará 3, 6, 12 meses y año en curso.",
-                color: "text-sky-400",
               },
             ].map((card, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{
-                  boxShadow: "0 0 20px 8px rgba(56, 189, 248, 0.45)", // 💙 destello celeste
-                }}
-                transition={{ duration: 0.3 }}
-                className="relative bg-slate-950/80 border border-slate-800 rounded-2xl px-6 py-6 shadow-xl text-slate-50 transition duration-300 cursor-pointer"
+                variants={itemFade}
+                whileHover={{ y: -2, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                className="relative overflow-hidden bg-slate-950/80 border border-slate-800 rounded-2xl px-6 py-6 shadow-xl text-slate-50 cursor-pointer"
               >
-                <div
-                  className={`text-sm md:text-base uppercase tracking-wide mb-2 ${card.color}`}
-                >
-                  {card.title}
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 opacity-0"
+                  whileHover={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    background:
+                      "radial-gradient(700px circle at 30% 0%, rgba(56,189,248,0.18), transparent 45%)",
+                  }}
+                />
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-2xl"
+                  whileHover={{
+                    boxShadow: "inset 0 0 0 1px rgba(56,189,248,0.30)",
+                  }}
+                  transition={{ duration: 0.2 }}
+                />
+
+                <div className="relative">
+                  <div className="text-sm md:text-base uppercase tracking-wide mb-2 text-sky-400">
+                    {card.title}
+                  </div>
+                  <p className="text-sm md:text-base text-slate-300">
+                    {card.desc}
+                  </p>
                 </div>
-                <p className="text-sm md:text-base text-slate-300">
-                  {card.desc}
-                </p>
               </motion.div>
             ))}
           </motion.div>
         </div>
 
-        {/* GALERÍA DE IMÁGENES (con imágenes reales de Internet) */}
+        {/* GALERÍA */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
+          variants={section}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.35 }}
           className="space-y-4"
         >
           <h2 className="text-lg md:text-xl font-semibold text-slate-100 mb-4">
@@ -331,50 +400,37 @@ const LandingPage: FC = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* Imagen 1 */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -4 }}
-              className="relative h-44 rounded-2xl overflow-hidden border border-slate-800"
-            >
-              <img
-                src="https://images.unsplash.com/photo-1528543606781-2f6e6857f318?auto=format&fit=crop&w=800&q=80"
-                className="w-full h-full object-cover opacity-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-              <p className="absolute bottom-2 left-3 text-m text-slate-200">
-                Mapa interactivo con valores por m².
-              </p>
-            </motion.div>
-
-            {/* Imagen 2 */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -4 }}
-              className="relative h-44 rounded-2xl overflow-hidden border border-slate-800"
-            >
-              <img
-                src="https://images.unsplash.com/photo-1554224154-22dec7ec8818?auto=format&fit=crop&w=800&q=80"
-                className="w-full h-full object-cover opacity-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-              <p className="absolute bottom-2 left-3 text-m text-slate-200">
-                Sesiones y variaciones del mercado.
-              </p>
-            </motion.div>
-
-            {/* Imagen 3 */}
-            <motion.div
-              whileHover={{ scale: 1.03, y: -4 }}
-              className="relative h-44 rounded-2xl overflow-hidden border border-slate-800"
-            >
-              <img
-                src="https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=800&q=80"
-                className="w-full h-full object-cover opacity-80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-              <p className="absolute bottom-2 left-3 text-m text-slate-200">
-                Ranking de barrios y oportunidades.
-              </p>
-            </motion.div>
+            {[
+              {
+                img: "https://images.unsplash.com/photo-1528543606781-2f6e6857f318?auto=format&fit=crop&w=800&q=80",
+                text: "Mapa interactivo con valores por m².",
+              },
+              {
+                img: "https://images.unsplash.com/photo-1554224154-22dec7ec8818?auto=format&fit=crop&w=800&q=80",
+                text: "Sesiones y variaciones del mercado.",
+              },
+              {
+                img: "https://images.unsplash.com/photo-1509395176047-4a66953fd231?auto=format&fit=crop&w=800&q=80",
+                text: "Ranking de barrios y oportunidades.",
+              },
+            ].map((it, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ scale: 1.02, y: -3 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                className="relative h-44 rounded-2xl overflow-hidden border border-slate-800"
+              >
+                <img
+                  src={it.img}
+                  className="w-full h-full object-cover opacity-80"
+                  alt=""
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
+                <p className="absolute bottom-2 left-3 text-m text-slate-200">
+                  {it.text}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </motion.div>
       </div>

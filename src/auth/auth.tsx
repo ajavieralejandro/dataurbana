@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 
 export type User = {
   name: string;
@@ -40,11 +40,8 @@ function saveUser(user: User | null) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    setUser(loadUser());
-  }, []);
+  // ✅ Inicializa desde localStorage en el primer render (evita rebotes raros)
+  const [user, setUser] = useState<User | null>(() => loadUser());
 
   const value = useMemo<AuthState>(() => {
     return {
@@ -67,14 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ? { name: "Admin", email, role: "admin" }
           : { name: "Demo", email, role: "analyst" };
 
-        setUser(u);
         saveUser(u);
+        setUser(u);
         return { ok: true as const };
       },
 
       logout: () => {
-        setUser(null);
         saveUser(null);
+        setUser(null);
       },
     };
   }, [user]);
