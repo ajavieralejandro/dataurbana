@@ -1,50 +1,42 @@
-import { FC, useState, useEffect, useRef } from "react";
+import { FC, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
 import { BsWhatsapp } from "react-icons/bs";
 
 const Navbar: FC = () => {
-  const [moreOpen, setMoreOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
-  const moreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const onScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
-        setMoreOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const NavItem = ({ to, children }: { to: string; children: React.ReactNode }) => (
+    <Link
+      to={to}
+      className="relative group text-slate-400 hover:text-white transition-colors duration-300 whitespace-nowrap"
+    >
+      {children}
+      <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-sky-400 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+    </Link>
+  );
 
   return (
     <header
       className={`sticky top-0 z-[100] border-b border-slate-800 backdrop-blur-xl transition-all duration-500
-    ${isScrolled ? "bg-slate-950/60" : "bg-slate-950/90"}
-  `}
+      ${isScrolled ? "bg-slate-950/60" : "bg-slate-950/90"}`}
     >
-      <nav className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      {/* ✅ full width */}
+      <nav className="w-full px-4 sm:px-6 lg:px-10 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link
           to="/"
           onClick={(e) => {
             e.preventDefault();
-            navigate("/"); // Ir a la página principal
-            setTimeout(() => {
-              window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll suave
-            }, 10);
+            navigate("/");
+            setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 10);
           }}
           className="text-2xl md:text-3xl font-bold tracking-tight relative group cursor-pointer"
         >
@@ -56,78 +48,28 @@ const Navbar: FC = () => {
           </span>
         </Link>
 
-        {/* Botones del centro */}
-        <div className="flex gap-6 text-lg md:text-xl font-medium">
-          <Link
-            to="/alquilar"
-            className="relative group text-slate-400 hover:text-white transition-colors duration-300"
-          >
-            Venta
-            <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-sky-400 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-          </Link>
-          <Link
-            to="/vender"
-            className="relative group text-slate-400 hover:text-white transition-colors duration-300"
-          >
-            Alquiler
-            <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-sky-400 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-          </Link>
-          <Link
-            to="/invertir"
-            className="relative group text-slate-400 hover:text-white transition-colors duration-300"
-          >
-            Inversión
-            <span className="absolute left-0 -bottom-1 w-full h-0.5 bg-sky-400 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-          </Link>
-
-          {/* Botón Más */}
-          <div className="relative flex items-center" ref={moreRef}>
-            <button
-              onClick={() => setMoreOpen(!moreOpen)}
-              className="flex items-center justify-center text-slate-400 hover:text-white transition-colors duration-300 h-full"
-            >
-              &#8230; {/* 3 puntos horizontales */}
-            </button>
-            {moreOpen && (
-              <div className="absolute top-full mt-2 right-0 w-48 bg-slate-900 border border-slate-700 rounded shadow-lg z-[110]">
-                <Link
-                  to="/noticias"
-                  className="block px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                >
-                  Noticias
-                </Link>
-                <Link
-                  to="/info-financiera"
-                  className="block px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                >
-                  Información financiera
-                </Link>
-                <Link
-                  to="/heatmaps"
-                  className="block px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                >
-                  Heatmaps
-                </Link>
-                <Link
-                  to="/heatmaps"
-                  className="block px-4 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                >
-                  Contacto
-                </Link>
-              </div>
-            )}
-          </div>
+        {/* Centro */}
+        <div className="hidden md:flex items-center gap-6 text-lg md:text-xl font-medium">
+          <NavItem to="/alquilar">Venta</NavItem>
+          <NavItem to="/vender">Alquiler</NavItem>
+          <NavItem to="/invertir">Inversión</NavItem>
+          <NavItem to="/noticias">Noticias</NavItem>
+          <NavItem to="/info-financiera">Finanzas</NavItem>
+          <NavItem to="/heatmaps">Heatmaps</NavItem>
+          <NavItem to="/contacto">Contacto</NavItem>
         </div>
 
-        {/* Botones a la derecha */}
-        <div className="flex items-center gap-4">
+        {/* Derecha */}
+        <div className="flex items-center gap-3">
           <a
             href="https://wa.me/tu-numero"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-green-400 hover:text-white text-2xl transition-colors duration-300"
+            className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-900/50 transition-all duration-200"
+            aria-label="WhatsApp"
           >
-            <BsWhatsapp />
+            <BsWhatsapp className="text-lg" />
+            <span className="text-sm font-medium">WhatsApp</span>
           </a>
 
           <Link
@@ -138,6 +80,16 @@ const Navbar: FC = () => {
           </Link>
         </div>
       </nav>
+
+      {/* Mobile */}
+      <div className="md:hidden border-t border-slate-800">
+        <div className="w-full px-4 sm:px-6 lg:px-10 py-3 flex gap-5 overflow-x-auto text-base font-medium">
+          <NavItem to="/alquilar">Venta</NavItem>
+          <NavItem to="/vender">Alquiler</NavItem>
+          <NavItem to="/invertir">Inversión</NavItem>
+          <NavItem to="/contacto">Contacto</NavItem>
+        </div>
+      </div>
     </header>
   );
 };
