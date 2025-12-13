@@ -2,10 +2,13 @@ import { FC, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
 import { BsWhatsapp } from "react-icons/bs";
+import { useAuth } from "../../auth/auth"; // ✅ ajustá si tu Navbar está en otra carpeta
 
 const Navbar: FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+
+  const { isAuthed, user, logout } = useAuth(); // ✅
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 20);
@@ -28,7 +31,6 @@ const Navbar: FC = () => {
       className={`sticky top-0 z-[100] border-b border-slate-800 backdrop-blur-xl transition-all duration-500
       ${isScrolled ? "bg-slate-950/60" : "bg-slate-950/90"}`}
     >
-      {/* ✅ full width */}
       <nav className="w-full px-4 sm:px-6 lg:px-10 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link
@@ -57,6 +59,14 @@ const Navbar: FC = () => {
           <NavItem to="/info-financiera">Finanzas</NavItem>
           <NavItem to="/heatmaps">Heatmaps</NavItem>
           <NavItem to="/contacto">Contacto</NavItem>
+
+          {/* ✅ Enlaces privados */}
+          {isAuthed && (
+            <>
+              <NavItem to="/dashboard">Dashboard</NavItem>
+              <NavItem to="/tasador">Tasador</NavItem>
+            </>
+          )}
         </div>
 
         {/* Derecha */}
@@ -72,12 +82,30 @@ const Navbar: FC = () => {
             <span className="text-sm font-medium">WhatsApp</span>
           </a>
 
-          <Link
-            to="/acceder"
-            className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-md transition-all duration-300"
-          >
-            <FiUser /> Acceder
-          </Link>
+          {!isAuthed ? (
+            <Link
+              to="/acceder"
+              className="flex items-center gap-2 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-md transition-all duration-300"
+            >
+              <FiUser /> Acceder
+            </Link>
+          ) : (
+            <>
+              <div className="hidden sm:block text-xs text-slate-300">
+                {user?.name} <span className="text-slate-500">({user?.email})</span>
+              </div>
+
+              <button
+                onClick={() => {
+                  logout();
+                  navigate("/acceder");
+                }}
+                className="px-4 py-2 bg-slate-900/60 hover:bg-slate-900 text-slate-200 rounded-md border border-slate-800 transition-all duration-200"
+              >
+                Salir
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
@@ -88,6 +116,14 @@ const Navbar: FC = () => {
           <NavItem to="/vender">Alquiler</NavItem>
           <NavItem to="/invertir">Inversión</NavItem>
           <NavItem to="/contacto">Contacto</NavItem>
+
+          {/* ✅ privados mobile */}
+          {isAuthed && (
+            <>
+              <NavItem to="/dashboard">Dashboard</NavItem>
+              <NavItem to="/tasador">Tasador</NavItem>
+            </>
+          )}
         </div>
       </div>
     </header>

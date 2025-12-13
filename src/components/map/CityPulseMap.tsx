@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -16,49 +16,35 @@ interface NeighborhoodStat {
 const cabaCenter: LatLngExpression = [-34.6037, -58.3816];
 
 const neighborhoods: NeighborhoodStat[] = [
-  {
-    name: "Palermo",
-    coords: [-34.5794, -58.4259],
-    avgPriceUsdM2: 2600,
-    avgRentUsd: 650,
-    trend: "up",
-  },
-  {
-    name: "Recoleta",
-    coords: [-34.5884, -58.3925],
-    avgPriceUsdM2: 2800,
-    avgRentUsd: 700,
-    trend: "flat",
-  },
-  {
-    name: "Caballito",
-    coords: [-34.6186, -58.442],
-    avgPriceUsdM2: 2200,
-    avgRentUsd: 550,
-    trend: "up",
-  },
-  {
-    name: "Belgrano",
-    coords: [-34.5614, -58.4584],
-    avgPriceUsdM2: 2500,
-    avgRentUsd: 630,
-    trend: "down",
-  },
+  { name: "Palermo", coords: [-34.5794, -58.4259], avgPriceUsdM2: 2600, avgRentUsd: 650, trend: "up" },
+  { name: "Recoleta", coords: [-34.5884, -58.3925], avgPriceUsdM2: 2800, avgRentUsd: 700, trend: "flat" },
+  { name: "Caballito", coords: [-34.6186, -58.442], avgPriceUsdM2: 2200, avgRentUsd: 550, trend: "up" },
+  { name: "Belgrano", coords: [-34.5614, -58.4584], avgPriceUsdM2: 2500, avgRentUsd: 630, trend: "down" },
 ];
 
 const CityPulseMap: FC = () => {
   const [active, setActive] = useState<NeighborhoodStat | null>(null);
 
-  const getRadius = (avgPriceUsdM2: number): number => {
-    // escala sencilla: base 8 + extra según precio
-    return 8 + (avgPriceUsdM2 - 2000) / 150;
-  };
+  // ✅ Evita crash en el primer render / StrictMode: render del mapa solo “en cliente”
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const getRadius = (avgPriceUsdM2: number): number => 8 + (avgPriceUsdM2 - 2000) / 150;
 
   const trendLabel = (trend: NeighborhoodStat["trend"]): string => {
     if (trend === "up") return "En alza";
     if (trend === "down") return "En baja";
     return "Estable";
   };
+
+  const safeNeighborhoods = useMemo(() => neighborhoods, []);
+
+  if (!mounted) {
+    // Skeleton visual mientras monta
+    return (
+      <div className="w-full h-full rounded-3xl border border-slate-800 bg-slate-900/40 animate-pulse" />
+    );
+  }
 
   return (
     <div className="relative w-full h-full rounded-3xl overflow-hidden">
@@ -67,8 +53,10 @@ const CityPulseMap: FC = () => {
         zoom={12}
         scrollWheelZoom
         className="w-full h-full"
-        whenCreated={(map) => {
-          map.on("click", () => setActive(null)); // cierra tarjeta al click en cualquier parte del mapa
+        // ✅ Leaflet a veces necesita invalidar size si el contenedor aparece luego
+        whenReady={(e) => {
+          e.target.invalidateSize();
+          e.target.on("click", () => setActive(null));
         }}
       >
         <TileLayer
@@ -76,7 +64,7 @@ const CityPulseMap: FC = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {neighborhoods.map((n) => (
+        {safeNeighborhoods.map((n) => (
           <CircleMarker
             key={n.name}
             center={n.coords}
@@ -88,7 +76,7 @@ const CityPulseMap: FC = () => {
             }}
             eventHandlers={{
               click: (e) => {
-                e.originalEvent.stopPropagation(); // evita que el click en el marcador cierre la tarjeta
+                e.originalEvent.stopPropagation();
                 setActive((prev) => (prev?.name === n.name ? null : n));
               },
               mouseover: () => setActive(n),
@@ -113,7 +101,6 @@ const CityPulseMap: FC = () => {
         ))}
       </MapContainer>
 
-      {/* Tarjeta animada con info del barrio activo */}
       <AnimatePresence>
         {active && (
           <motion.div
@@ -138,6 +125,7 @@ const CityPulseMap: FC = () => {
                 ● {trendLabel(active.trend)}
               </span>
             </div>
+
             <div className="flex flex-col gap-1">
               <span>
                 Venta prom.:{" "}
@@ -154,8 +142,7 @@ const CityPulseMap: FC = () => {
             </div>
 
             <div className="mt-2 text-[0.7rem] text-slate-400">
-              Datos demo hardcodeados. Después los conectamos al motor real de
-              mercado.
+              Datos demo hardcodeados. Después los conectamos al motor real de mercado.
             </div>
           </motion.div>
         )}
