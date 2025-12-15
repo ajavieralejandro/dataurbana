@@ -1,32 +1,53 @@
 // src/routes/Dashboard.tsx
 import type { FC } from "react";
+import { Link } from "react-router-dom";
+
 import CityPulseMap from "../components/map/CityPulseMap";
-// si todavía usás ArgentinaMap, podés cambiar CityPulseMap por ArgentinaMap
 import MarketSessionPanel from "../components/analytics/MarketSessionPanel";
 import MarketHighlightCards from "../components/analytics/MarketHighlightCards";
 
 const Dashboard: FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-2xl md:text-3xl font-semibold mb-4">
-        Dashboard de mercado
-      </h1>
+      {/* Header + acciones */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-5">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold text-slate-100">
+            Dashboard de mercado
+          </h1>
+          <p className="text-sm text-slate-300 mt-1">
+            Indicadores clave, mapa por zonas y sesiones del mercado.
+          </p>
+        </div>
 
-      <p className="text-sm text-slate-300 mb-6">
-        Resumen del mercado inmobiliario de CABA: indicadores clave, mapa por
-        barrios y variaciones en distintos períodos.
-      </p>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/tasador"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium bg-sky-500 hover:bg-sky-400 transition shadow-md shadow-sky-500/20"
+          >
+            Ir al tasador
+          </Link>
 
-      {/* 🔹 Tarjetas resumen arriba */}
-      <MarketHighlightCards />
-
-      {/* 🔹 Mapa creativo / ArgentinaMap en el medio */}
-      <div className="w-full h-96 rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden mb-8">
-        <CityPulseMap />
-        {/* O: <ArgentinaMap /> si preferís el otro */}
+          <Link
+            to="/valores"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium bg-slate-900/70 border border-slate-700 text-slate-200 hover:border-sky-400 transition"
+          >
+            Valores de referencia
+          </Link>
+        </div>
       </div>
 
-      {/* 🔹 Sesiones animadas abajo */}
+      {/* Tarjetas resumen */}
+      <div className="mb-6">
+        <MarketHighlightCards />
+      </div>
+
+      {/* Mapa */}
+      <div className="w-full h-96 rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden mb-8">
+        <CityPulseMap />
+      </div>
+
+      {/* Panel de sesiones */}
       <MarketSessionPanel />
     </div>
   );

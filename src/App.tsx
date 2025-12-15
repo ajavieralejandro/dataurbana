@@ -25,9 +25,7 @@ const App: FC = () => {
           <Route
             path="/dashboard"
             element={
-              <RequireAuth>
                 <Dashboard />
-              </RequireAuth>
             }
           />
 
