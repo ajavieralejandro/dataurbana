@@ -1,7 +1,9 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Comparable } from "../../market/types";
+
+type LatLng = { lat: number; lng: number };
 
 const fallbackCenter: LatLngExpression = [-34.6037, -58.3816]; // CABA
 
@@ -17,22 +19,49 @@ function formatMoney(value: number, currency: string) {
   }
 }
 
+function FlyTo({ center, zoom }: { center: LatLngExpression; zoom: number }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.flyTo(center, zoom, { animate: true, duration: 0.8 });
+  }, [center, zoom, map]);
+
+  return null;
+}
+
+// 👇 faltaba esto
+import { useEffect, useMemo } from "react";
+
 export function ComparablesMap({
   zone,
   comparables,
+  pin,
 }: {
   zone: string;
   comparables: Comparable[];
+  pin?: LatLng | null;
 }) {
-  const pts = comparables.filter((c) => typeof c.lat === "number" && typeof c.lng === "number");
+  const pts = comparables.filter(
+    (c) => typeof c.lat === "number" && typeof c.lng === "number"
+  );
 
-  const center: LatLngExpression =
+  const comparablesCenter: LatLngExpression =
     pts.length > 0
       ? ([
           pts.reduce((acc, c) => acc + (c.lat as number), 0) / pts.length,
           pts.reduce((acc, c) => acc + (c.lng as number), 0) / pts.length,
         ] as LatLngExpression)
       : fallbackCenter;
+
+  // ✅ centro “activo”: si hay pin, manda el pin; si no, centro por comparables
+  const activeCenter = useMemo<LatLngExpression>(() => {
+    if (pin && Number.isFinite(pin.lat) && Number.isFinite(pin.lng)) {
+      return [pin.lat, pin.lng] as LatLngExpression;
+    }
+    return comparablesCenter;
+  }, [pin, comparablesCenter]);
+
+  const activeZoom = pin ? 15 : 13;
 
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden">
@@ -41,16 +70,36 @@ export function ComparablesMap({
           <div className="text-white font-semibold">Mapa de comparables</div>
           <div className="text-slate-400 text-sm">Zona: {zone}</div>
         </div>
-        <div className="text-slate-400 text-sm">{pts.length} pins</div>
+        <div className="text-slate-400 text-sm">
+          {pts.length} pins{pin ? " · +1 tasado" : ""}
+        </div>
       </div>
 
       <div className="h-[360px]">
-        <MapContainer center={center} zoom={13} scrollWheelZoom className="w-full h-full">
+        <MapContainer center={activeCenter} zoom={activeZoom} scrollWheelZoom className="w-full h-full">
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
+          {/* ✅ mover cuando cambia activeCenter */}
+          <FlyTo center={activeCenter} zoom={activeZoom} />
+
+          {/* ✅ marcador del inmueble tasado (pin) */}
+          {pin && (
+            <Marker position={[pin.lat, pin.lng]}>
+              <Popup>
+                <div style={{ fontSize: 13 }}>
+                  <div style={{ fontWeight: 700 }}>Inmueble tasado</div>
+                  <div>
+                    {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {/* comparables */}
           {pts.map((c) => (
             <Marker key={c.id} position={[c.lat as number, c.lng as number]}>
               <Popup>
@@ -62,16 +111,13 @@ export function ComparablesMap({
                     {formatMoney(c.price, c.currency)} · {c.areaM2} m²{" "}
                     {typeof c.rooms === "number" ? `· ${c.rooms} amb` : ""}
                   </div>
-                  <div>{Math.round(c.price / c.areaM2)} {c.currency}/m²</div>
+                  <div>
+                    {Math.round(c.price / c.areaM2)} {c.currency}/m²
+                  </div>
                 </div>
               </Popup>
             </Marker>
           ))}
-
-          {pts.length === 0 && (
-            // (No hay overlay nativo simple, lo dejamos como hint visual fuera)
-            null
-          )}
         </MapContainer>
       </div>
 
