@@ -7,7 +7,8 @@ export const mockReferences: ReferenceValue[] = [
     operation: "VENTA",
     propertyType: "DEPTO",
     currency: "USD",
-    valuePerM2: 2400,
+    pricePerM2: 2400,
+    valuePerM2: 2400, // compat
     p25: 2100,
     p75: 2800,
     updatedAt: new Date().toISOString(),
@@ -20,7 +21,8 @@ export const mockReferences: ReferenceValue[] = [
     operation: "VENTA",
     propertyType: "DEPTO",
     currency: "USD",
-    valuePerM2: 1900,
+    pricePerM2: 1900,
+    valuePerM2: 1900, // compat
     p25: 1700,
     p75: 2200,
     updatedAt: new Date().toISOString(),
@@ -33,7 +35,8 @@ export const mockReferences: ReferenceValue[] = [
     operation: "ALQUILER",
     propertyType: "DEPTO",
     currency: "ARS",
-    valuePerM2: 8500,
+    pricePerM2: 8500,
+    valuePerM2: 8500, // compat
     p25: 7000,
     p75: 10500,
     updatedAt: new Date().toISOString(),
@@ -57,6 +60,8 @@ export const mockComparables: Comparable[] = [
     hasGarage: false,
     hasBalcony: true,
     publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString(),
+    // lat: -34.5794,
+    // lng: -58.4259,
   },
   {
     id: "cmp2",
@@ -72,6 +77,8 @@ export const mockComparables: Comparable[] = [
     hasGarage: true,
     hasBalcony: true,
     publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20).toISOString(),
+    // lat: -34.5884,
+    // lng: -58.3925,
   },
   {
     id: "cmp3",
@@ -87,5 +94,7 @@ export const mockComparables: Comparable[] = [
     hasGarage: false,
     hasBalcony: true,
     publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString(),
+    // lat: -34.6186,
+    // lng: -58.442,
   },
 ];

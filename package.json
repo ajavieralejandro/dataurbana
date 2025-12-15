@@ -2,6 +2,7 @@
   "name": "dataurbana",
   "private": true,
   "version": "0.0.0",
+    "homepage": "https://ajavieralejandro.github.io/dataurbana",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +12,7 @@
   },
   "dependencies": {
     "framer-motion": "^12.23.25",
+    "gh-pages": "^6.3.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.556.0",
     "react": "^19.2.0",

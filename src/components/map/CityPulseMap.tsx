@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { motion, AnimatePresence } from "framer-motion";
@@ -46,6 +46,21 @@ const CityPulseMap: FC = () => {
     );
   }
 
+  // ✅ Usamos `useMap()` para acceder a la instancia del mapa
+  const map = useMap();
+
+  // ✅ Función que se ejecuta cuando el mapa se ha cargado, para llamar `invalidateSize`
+  useEffect(() => {
+    if (map) {
+      map.invalidateSize();
+    }
+  }, [map]);
+
+  // ✅ Usamos `useMapEvents()` para manejar el click en el mapa
+  useMapEvents({
+    click: () => setActive(null),
+  });
+
   return (
     <div className="relative w-full h-full rounded-3xl overflow-hidden">
       <MapContainer
@@ -53,11 +68,6 @@ const CityPulseMap: FC = () => {
         zoom={12}
         scrollWheelZoom
         className="w-full h-full"
-        // ✅ Leaflet a veces necesita invalidar size si el contenedor aparece luego
-        whenReady={(e) => {
-          e.target.invalidateSize();
-          e.target.on("click", () => setActive(null));
-        }}
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"

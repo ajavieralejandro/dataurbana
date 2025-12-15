@@ -45,7 +45,8 @@ export function ResultPanel({ r }: { r?: ValuationResult }) {
       {r?.usedReference ? (
         <div className="mt-4 text-slate-400 text-sm">
           Ref: {r.usedReference.zone} · {r.usedReference.operation} · {r.usedReference.propertyType} ·{" "}
-          {r.usedReference.valuePerM2.toFixed(0)} {r.usedReference.currency}/m²
+{(r.usedReference.pricePerM2 ?? r.usedReference.valuePerM2 ?? 0).toFixed(0)}{" "}
+{r.usedReference.currency}/m²
         </div>
       ) : (
         <div className="mt-4 text-slate-400 text-sm">Sin referencia (usando solo comparables o 0).</div>

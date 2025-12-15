@@ -1,23 +1,22 @@
-// src/market/calc.ts
-import type { Comparable, ReferenceValue, ValuationInput } from "./types";
+import type { Comparable, ReferenceValue, ValuationInput, ValuationResult } from "./types";
 
 function scoreComparable(c: Comparable, input: ValuationInput) {
   let score = 0;
 
-  // misma zona suma más
   if (c.zone === input.zone) score += 5;
-
-  // misma operación/tipo/currency suma
   if (c.operation === input.operation) score += 3;
   if (c.propertyType === input.propertyType) score += 3;
   if (c.currency === input.currency) score += 2;
 
-  // penalizaciones por distancia numérica
-  score -= Math.abs((c.areaM2 ?? 0) - (input.areaM2 ?? 0)) / 10;
-  score -= Math.abs((c.rooms ?? 0) - (input.rooms ?? 0)) * 1.5;
-  score -= Math.abs((c.ageYears ?? 0) - (input.ageYears ?? 0)) / 5;
+  score -= Math.abs(c.areaM2 - input.areaM2) / 10;
 
-  // extras
+  if (typeof c.rooms === "number" && typeof input.rooms === "number") {
+    score -= Math.abs(c.rooms - input.rooms) * 1.5;
+  }
+  if (typeof c.ageYears === "number" && typeof input.ageYears === "number") {
+    score -= Math.abs(c.ageYears - input.ageYears) / 5;
+  }
+
   if (input.hasGarage && c.hasGarage) score += 1;
   if (input.hasBalcony && c.hasBalcony) score += 1;
 
@@ -26,13 +25,21 @@ function scoreComparable(c: Comparable, input: ValuationInput) {
 
 export function pickComparables(cmps: Comparable[], input: ValuationInput, limit = 6): Comparable[] {
   return [...cmps]
-    .filter((c) => c.operation === input.operation && c.propertyType === input.propertyType)
+    .filter(
+      (c) =>
+        c.operation === input.operation &&
+        c.propertyType === input.propertyType &&
+        c.currency === input.currency
+    )
     .sort((a, b) => scoreComparable(b, input) - scoreComparable(a, input))
     .slice(0, limit);
 }
 
-export function runValuation(input: ValuationInput, refs: ReferenceValue[], comparables: Comparable[]) {
-  // referencia por zona/operación/tipo/moneda (lo más cercano)
+export function runValuation(
+  input: ValuationInput,
+  refs: ReferenceValue[],
+  comparables: Comparable[]
+): ValuationResult {
   const ref = refs.find(
     (r) =>
       r.zone === input.zone &&
@@ -41,26 +48,44 @@ export function runValuation(input: ValuationInput, refs: ReferenceValue[], comp
       r.currency === input.currency
   );
 
-  const refPpm2 = ref?.pricePerM2 ?? null;
+  const refPpm2 = ref?.pricePerM2 ?? ref?.valuePerM2 ?? null;
 
-  // promedio de comparables por m2 si existe data
-  const cmpsPpm2 = comparables
-    .map((c) => (c.price && c.areaM2 ? c.price / c.areaM2 : null))
-    .filter((x): x is number => typeof x === "number" && isFinite(x));
+  const cmpPpm2 = comparables.map((c) => c.price / c.areaM2);
+  const avgCmpPpm2 = cmpPpm2.length
+    ? cmpPpm2.reduce((a, b) => a + b, 0) / cmpPpm2.length
+    : null;
 
-  const avgCmpPpm2 = cmpsPpm2.length ? cmpsPpm2.reduce((a, b) => a + b, 0) / cmpsPpm2.length : null;
+  const basePpm2 =
+    typeof refPpm2 === "number" && typeof avgCmpPpm2 === "number"
+      ? (refPpm2 + avgCmpPpm2) / 2
+      : (refPpm2 ?? avgCmpPpm2 ?? 0);
 
-  // mezcla simple: si hay ambos, promedia; si hay uno, usa ese
-  const ppm2 =
-    refPpm2 != null && avgCmpPpm2 != null ? (refPpm2 + avgCmpPpm2) / 2 : (refPpm2 ?? avgCmpPpm2);
+  const adjustments: { label: string; pct: number }[] = [];
+  if (input.hasGarage) adjustments.push({ label: "Cochera", pct: 0.03 });
+  if (input.hasBalcony) adjustments.push({ label: "Balcón", pct: 0.015 });
 
-  const estimated = ppm2 != null ? ppm2 * (input.areaM2 ?? 0) : null;
+  const totalAdj = adjustments.reduce((acc, a) => acc + a.pct, 0);
+  const adjPpm2 = basePpm2 * (1 + totalAdj);
+
+  const estimated = adjPpm2 * input.areaM2;
 
   return {
-    ppm2,
+    ppm2: adjPpm2,
     estimated,
     refUsed: ref ?? null,
     avgComparablePpm2: avgCmpPpm2,
     comparablesCount: comparables.length,
+
+    // compat con tu ResultPanel actual
+    usedReference: ref ?? undefined,
+    comparablesUsed: comparables,
+
+    // lo dejamos para UI futura
+    adjustments,
+
+    // extras opcionales
+    estimatedPrice: estimated,
+    currency: input.currency,
+    pricePerM2: adjPpm2,
   };
 }

@@ -1,5 +1,5 @@
-import { FC, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+ import type { FC } from "react";
+ import { useEffect, useState } from "react";import { Link, useNavigate } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
 import { BsWhatsapp } from "react-icons/bs";
 import { HiOutlineMenuAlt3, HiOutlineX } from "react-icons/hi";

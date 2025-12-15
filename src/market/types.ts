@@ -11,7 +11,13 @@ export type ReferenceValue = {
   propertyType: PropertyType;
 
   currency: Currency;
-  valuePerM2: number;
+
+  // ✅ Canon: un solo nombre “real”
+  pricePerM2: number;
+
+  // ✅ Compat: si algún componente viejo usa valuePerM2, lo dejamos opcional
+  valuePerM2?: number;
+
   p25?: number;
   p75?: number;
 
@@ -39,6 +45,10 @@ export type Comparable = {
 
   publishedAt: string;
   sourceUrl?: string;
+
+  // ✅ para mapas
+  lat?: number;
+  lng?: number;
 };
 
 export type ValuationInput = {
@@ -54,17 +64,32 @@ export type ValuationInput = {
   hasGarage?: boolean;
   hasBalcony?: boolean;
 };
-
 export type ValuationResult = {
-  estimatedPrice: number;
-  currency: Currency;
-  pricePerM2: number;
+  // núcleo
+  ppm2: number | null;
+  estimated: number | null;
+  refUsed: ReferenceValue | null;
+  avgComparablePpm2: number | null;
+  comparablesCount: number;
 
-  p25: number;
-  p50: number;
-  p75: number;
-
+  // usados por ResultPanel actual
   usedReference?: ReferenceValue;
-  comparablesUsed: Comparable[];
-  adjustments: { label: string; pct: number }[];
+  comparablesUsed?: Comparable[];
+
+  // ✅ ESTO FALTABA
+  adjustments?: {
+    label: string;
+    pct: number;
+  }[];
+
+  // compat legacy
+  estimatedPrice?: number | null;
+  currency?: string;
+  pricePerM2?: number | null;
+  p25?: number | null;
+  p50?: number | null;
+  p75?: number | null;
+  min?: number | null;
+  max?: number | null;
 };
+
