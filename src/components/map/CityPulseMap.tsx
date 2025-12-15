@@ -1,6 +1,13 @@
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  CircleMarker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,14 +29,34 @@ const neighborhoods: NeighborhoodStat[] = [
   { name: "Belgrano", coords: [-34.5614, -58.4584], avgPriceUsdM2: 2500, avgRentUsd: 630, trend: "down" },
 ];
 
+// ✅ hooks de leaflet SIEMPRE dentro del MapContainer
+function MapFixes({ onClear }: { onClear: () => void }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.invalidateSize();
+    const t = setTimeout(() => map.invalidateSize(), 250);
+    return () => clearTimeout(t);
+  }, [map]);
+
+  useMapEvents({
+    click: () => onClear(),
+  });
+
+  return null;
+}
+
 const CityPulseMap: FC = () => {
   const [active, setActive] = useState<NeighborhoodStat | null>(null);
 
-  // ✅ Evita crash en el primer render / StrictMode: render del mapa solo “en cliente”
+  // ✅ Evita problemas raros de hidratación / mount
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const getRadius = (avgPriceUsdM2: number): number => 8 + (avgPriceUsdM2 - 2000) / 150;
+  const safeNeighborhoods = useMemo(() => neighborhoods, []);
+
+  const getRadius = (avgPriceUsdM2: number): number =>
+    Math.max(6, 8 + (avgPriceUsdM2 - 2000) / 150);
 
   const trendLabel = (trend: NeighborhoodStat["trend"]): string => {
     if (trend === "up") return "En alza";
@@ -37,29 +64,11 @@ const CityPulseMap: FC = () => {
     return "Estable";
   };
 
-  const safeNeighborhoods = useMemo(() => neighborhoods, []);
-
   if (!mounted) {
-    // Skeleton visual mientras monta
     return (
       <div className="w-full h-full rounded-3xl border border-slate-800 bg-slate-900/40 animate-pulse" />
     );
   }
-
-  // ✅ Usamos `useMap()` para acceder a la instancia del mapa
-  const map = useMap();
-
-  // ✅ Función que se ejecuta cuando el mapa se ha cargado, para llamar `invalidateSize`
-  useEffect(() => {
-    if (map) {
-      map.invalidateSize();
-    }
-  }, [map]);
-
-  // ✅ Usamos `useMapEvents()` para manejar el click en el mapa
-  useMapEvents({
-    click: () => setActive(null),
-  });
 
   return (
     <div className="relative w-full h-full rounded-3xl overflow-hidden">
@@ -69,6 +78,8 @@ const CityPulseMap: FC = () => {
         scrollWheelZoom
         className="w-full h-full"
       >
+        <MapFixes onClear={() => setActive(null)} />
+
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
